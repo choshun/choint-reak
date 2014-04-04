@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+	<head>
+		<title>
+			Choint Reak
+		</title>
+
+		<style>
+			#viewport-sniffer div {
+				display: none;
+			}
+
+			#viewport-sniffer .large-screen {
+				display: block;
+			}
+
+			@media print, screen and (max-width: 1049px) and (min-width: 606px) {
+				#viewport-sniffer .medium-screen {
+					display: block;
+				}
+			}
+
+			@media screen and (max-width: 605px) {
+				body {background-color: green;}
+				#viewport-sniffer .small-screen {
+					display: block;
+				}
+			}
+			
+		</style>
+	</head>
+
+	<body>
+		Hey there
+
+		<script src="js/choint-reak.js"></script>
+	</body>
+</html>
