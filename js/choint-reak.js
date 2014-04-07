@@ -1,42 +1,21 @@
+var chointReak = function(breakpointClasses, globalObject, timeout) {
 
-/* Add debounce
+	var oldViewport, resizeTimeout;
 
-var chointReak = function(timeout, breakpointClasses) {
-	function init() {
-		createBreacons(breakpointClasses);
-		bindResize();
-		fireOnBreakpointChange();
-	}
-
-	init();
-}
-	
- */
-
-var chointReak = function(timeout, breakpointClasses) {
-
-	var viewport,
-		oldViewport,
-		breakpoints,
-		resizeTimeout;
-
-	var VIEWPORT_SNIFFER = 'viewport-sniffer';
+	var VIEWPORT_SNIFFER = 'viewport-sniffer',
+		VIEWPORT_EVENT = 'viewport.change';
 
 	function init() {
-		breakPoints = createBreacons(breakpointClasses);
-		viewport = updateViewportState(breakPoints);
-		oldViewport = viewport;
+		var breakPoints = createBeacons(breakpointClasses),
+			viewport = updateViewportState(breakPoints),
+			oldViewport = viewport;
 
 		bindResize(breakPoints);
-
-		console.log(viewport);
-		
 	}
 
-	function createBreacons(breakpointClasses) {
-		var breakPointObject = {};
-
+	function createBeacons(breakpointClasses) {
 		var sniffer = document.createElement('section'),
+			breakPointObject = {},
 			breakpoint;
 
 		sniffer.setAttribute('id', VIEWPORT_SNIFFER);
@@ -53,50 +32,51 @@ var chointReak = function(timeout, breakpointClasses) {
 		return breakPointObject;
 	}
 
+	function updateViewportState(breakPoints) {
+		for (var breakpoint in breakPoints) {
+			var thisBreakpoint = breakPoints[breakpoint];
+
+			if (getComputedStyle(thisBreakpoint)['display'] === 'block') {
+				var viewport = thisBreakpoint.getAttribute('class');
+				globalObject.viewport = viewport;
+
+				if (oldViewport !== viewport) {
+					var breakpointEvent = eventPolyfill(VIEWPORT_EVENT);
+					document.dispatchEvent(breakpointEvent);
+					oldViewport = viewport;
+				}
+
+				return viewport;
+			}
+		}
+	}
+
+	function eventPolyfill(customEvent, event) {
+		if (window.CustomEvent) {
+			event = new CustomEvent(customEvent);
+		} else {
+			event = document.createEvent('CustomEvent');
+			event.initCustomEvent(customEvent, true, true);
+		}
+
+		return event;
+	}
+
 	function bindResize(breakPoints) {
 		window.addEventListener('resize', function() {
 			clearTimeout(resizeTimeout);
 
 			resizeTimeout = setTimeout(function() {
 				updateViewportState(breakPoints);
-				console.log('boop');
 			}, timeout);
 		});
 	}
 
-	function updateViewportState(breakPoints) {
-		for (var breakpoint in breakPoints) {
-			var thisBreakpoint = breakPoints[breakpoint],
-				event;
-
-			// TODO: getComputedStyle doesn't work in ie8, need currentstyle maybe? http://snipplr.com/view/13523/
-			if (getComputedStyle(thisBreakpoint)['display'] === 'block') {
-				viewport = thisBreakpoint.getAttribute('class');
-
-				if (oldViewport !== viewport) {
-					// TODO: custom event doesn't work in ie8 as is
-					if (window.CustomEvent) {
-						var event = new CustomEvent('viewport.change');
-					} else {
-						var event = document.createEvent('CustomEvent');
-						event.initCustomEvent('viewport.change', true, true);
-					}
-
-					document.dispatchEvent(event);
-
-					console.log('viewport.change');
-
-					oldViewport = viewport;
-				}
-
-				console.log(viewport);
-				return viewport;
-			}
-		}
-	}
-
 	init();
 };
+
+// global object to make viewport state a part of
+var TEST = {};
 
 var breakpointClasses = {};
 breakpointClasses.small = 'small-screen';
@@ -105,8 +85,11 @@ breakpointClasses.large = 'large-screen';
 
 var timeout = 400;
 
+var mimsIsCool = new chointReak(breakpointClasses, TEST, timeout);
+
+console.log(TEST.viewport);
+
 document.addEventListener('viewport.change', function() {
-	console.log('boom shaka rob laplaca');
+	console.log(TEST.viewport);
 });
 
-var mimsIsCool = new chointReak(timeout, breakpointClasses);
