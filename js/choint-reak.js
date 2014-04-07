@@ -1,8 +1,7 @@
 var chointReak = function(breakpointClasses, globalObject, timeout) {
 
-	var oldViewport, resizeTimeout;
-
-	var VIEWPORT_SNIFFER = 'viewport-sniffer',
+	var oldViewport, resizeTimeout,
+		VIEWPORT_SNIFFER = 'viewport-sniffer',
 		VIEWPORT_EVENT = 'viewport.change';
 
 	function init() {
